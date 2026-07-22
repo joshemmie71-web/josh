@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jinja College - Smart Visitor Check-In System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -71,6 +72,98 @@
         .header p {
             color: #666;
             font-size: 14px;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 2px dashed #667eea;
+        }
+
+        .qr-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .qr-code-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qr-code-box canvas {
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .qr-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .qr-download-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .qr-download-btn:hover {
+            background: #764ba2;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
@@ -214,6 +307,20 @@
             margin-left: 5px;
         }
 
+        .qr-info {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .qr-info strong {
+            color: #667eea;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -234,6 +341,19 @@
             .institution-logo {
                 font-size: 35px;
             }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .qr-container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -245,92 +365,265 @@
             <div class="institution-subtitle">Visitor Management System</div>
         </div>
 
-        <div class="header">
-            <h1>🔐 Smart Check-In</h1>
-            <p>Welcome to Jinja College! Please complete the form below to proceed</p>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('qr')">📱 QR Codes</button>
+            <button class="tab-btn" onclick="switchTab('checkin')">✓ Check-In</button>
+            <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
         </div>
 
-        <div class="success-message" id="successMsg">
-            ✓ Successfully checked in at Jinja College!
+        <!-- QR Code Tab -->
+        <div id="qr" class="tab-content active">
+            <div class="header">
+                <h1>🔐 Smart Check-In QR Codes</h1>
+                <p>Scan to access Jinja College visitor check-in system</p>
+            </div>
+
+            <div class="qr-info">
+                <strong>ℹ️ How to use:</strong> Print or display these QR codes at entrance areas, reception desks, and around the Jinja College campus. Visitors can scan them with their phones to instantly access the check-in system.
+            </div>
+
+            <div class="qr-section">
+                <h3>Main Check-In QR Code</h3>
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Scan this code to access the full check-in form</p>
+                <div class="qr-code-box">
+                    <div id="qrMain"></div>
+                    <button class="qr-download-btn" onclick="downloadQR('qrMain', 'jinja-college-checkin')">⬇️ Download QR</button>
+                </div>
+            </div>
+
+            <div class="qr-section">
+                <h3>Specific Department QR Codes</h3>
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Create custom QR codes for different departments</p>
+                
+                <div class="form-group">
+                    <label for="customUrl">Create Custom QR Code (Optional)</label>
+                    <input type="url" id="customUrl" placeholder="https://example.com or any URL" value="">
+                </div>
+                <button class="btn-submit" onclick="generateCustomQR()" style="width: 100%; margin-bottom: 20px;">Generate Custom QR</button>
+
+                <div class="qr-container" id="customQRContainer">
+                    <div class="qr-code-box">
+                        <div id="qrAdmissions"></div>
+                        <span class="qr-label">Admissions Office</span>
+                        <button class="qr-download-btn" onclick="downloadQR('qrAdmissions', 'admissions-qr')">⬇️ Download</button>
+                    </div>
+                    <div class="qr-code-box">
+                        <div id="qrRegistrar"></div>
+                        <span class="qr-label">Registrar Office</span>
+                        <button class="qr-download-btn" onclick="downloadQR('qrRegistrar', 'registrar-qr')">⬇️ Download</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+                <h4 style="color: #333; margin-bottom: 10px;">📋 Printing Tips:</h4>
+                <ul style="color: #666; font-size: 13px; line-height: 1.8; margin-left: 20px;">
+                    <li>Ensure QR codes are at least 2cm x 2cm for easy scanning</li>
+                    <li>Print on white background with clear contrast</li>
+                    <li>Test scan before finalizing placement</li>
+                    <li>Place at eye level at entrance points</li>
+                    <li>Use laminated prints for durability</li>
+                </ul>
+            </div>
         </div>
 
-        <div class="error-message" id="errorMsg">
-            ✗ Please fill in all required fields correctly
+        <!-- Check-In Tab -->
+        <div id="checkin" class="tab-content">
+            <div class="header">
+                <h1>🔐 Smart Check-In</h1>
+                <p>Welcome to Jinja College! Please complete the form below to proceed</p>
+            </div>
+
+            <div class="success-message" id="successMsg">
+                ✓ Successfully checked in at Jinja College!
+            </div>
+
+            <div class="error-message" id="errorMsg">
+                ✗ Please fill in all required fields correctly
+            </div>
+
+            <form id="checkinForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name <span class="institution-badge">Jinja College</span> *</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+256 ..." >
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company/Organization</label>
+                        <input type="text" id="company" name="company" placeholder="Your organization">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="visitReason">Reason for Visit at Jinja College *</label>
+                        <select id="visitReason" name="visitReason" required>
+                            <option value="">-- Select Reason --</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="interview">Interview</option>
+                            <option value="tour">Facility Tour</option>
+                            <option value="academic">Academic Purpose</option>
+                            <option value="event">Event/Conference</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hostName">Host/Person to Meet at Jinja College *</label>
+                        <input type="text" id="hostName" name="hostName" placeholder="Department/Person name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department/Office Visiting</label>
+                    <input type="text" id="department" name="department" placeholder="e.g., Administration, Finance, Academic Affairs">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes" name="notes" placeholder="Any special requirements or information for Jinja College staff..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-submit">Check In to Jinja College</button>
+                    <button type="reset" class="btn-reset">Clear</button>
+                </div>
+            </form>
         </div>
 
-        <form id="checkinForm">
-            <div class="form-group">
-                <label for="fullName">Full Name <span class="institution-badge">Jinja College</span> *</label>
-                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+256 ..." >
-                </div>
-                <div class="form-group">
-                    <label for="company">Company/Organization</label>
-                    <input type="text" id="company" name="company" placeholder="Your organization">
+        <!-- Visitors Tab -->
+        <div id="visitors" class="tab-content">
+            <div class="visitor-list">
+                <h2>Recent Check-Ins at Jinja College</h2>
+                <div id="visitorListContent" style="min-height: 100px;">
+                    <p style="text-align: center; color: #999; padding: 20px;">No visitors checked in yet</p>
                 </div>
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="visitReason">Reason for Visit at Jinja College *</label>
-                    <select id="visitReason" name="visitReason" required>
-                        <option value="">-- Select Reason --</option>
-                        <option value="meeting">Meeting</option>
-                        <option value="delivery">Delivery</option>
-                        <option value="interview">Interview</option>
-                        <option value="tour">Facility Tour</option>
-                        <option value="academic">Academic Purpose</option>
-                        <option value="event">Event/Conference</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="hostName">Host/Person to Meet at Jinja College *</label>
-                    <input type="text" id="hostName" name="hostName" placeholder="Department/Person name" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="department">Department/Office Visiting</label>
-                <input type="text" id="department" name="department" placeholder="e.g., Administration, Finance, Academic Affairs">
-            </div>
-
-            <div class="form-group">
-                <label for="notes">Additional Notes</label>
-                <textarea id="notes" name="notes" placeholder="Any special requirements or information for Jinja College staff..."></textarea>
-            </div>
-
-            <div class="button-group">
-                <button type="submit" class="btn-submit">Check In to Jinja College</button>
-                <button type="reset" class="btn-reset">Clear</button>
-            </div>
-        </form>
-
-        <div class="visitor-list" id="visitorList" style="display: none;">
-            <h2>Recent Check-Ins at Jinja College</h2>
-            <div id="visitorListContent"></div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <script>
         // Initialize visitors array from localStorage
         let visitors = JSON.parse(localStorage.getItem('jinjaCollegeVisitors')) || [];
+        let pageURL = window.location.href;
+
+        // Generate QR Codes on page load
+        window.addEventListener('load', function() {
+            generateQRCodes();
+            displayVisitors();
+        });
+
+        // Generate all QR codes
+        function generateQRCodes() {
+            // Main QR Code - current page URL
+            new QRCode(document.getElementById("qrMain"), {
+                text: pageURL,
+                width: 200,
+                height: 200,
+                colorDark: "#667eea",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Department-specific QR codes (can be customized with URL parameters)
+            new QRCode(document.getElementById("qrAdmissions"), {
+                text: pageURL + "?dept=admissions",
+                width: 200,
+                height: 200,
+                colorDark: "#667eea",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            new QRCode(document.getElementById("qrRegistrar"), {
+                text: pageURL + "?dept=registrar",
+                width: 200,
+                height: 200,
+                colorDark: "#667eea",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Generate custom QR code
+        function generateCustomQR() {
+            const customUrl = document.getElementById('customUrl').value.trim();
+            if (!customUrl) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            const container = document.getElementById('customQRContainer');
+            const customBox = document.createElement('div');
+            customBox.className = 'qr-code-box';
+            customBox.innerHTML = `
+                <div id="qrCustom"></div>
+                <span class="qr-label">Custom QR Code</span>
+                <button class="qr-download-btn" onclick="downloadQR('qrCustom', 'custom-qr')">⬇️ Download</button>
+            `;
+            container.appendChild(customBox);
+
+            setTimeout(() => {
+                new QRCode(document.getElementById("qrCustom"), {
+                    text: customUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#667eea",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }, 100);
+        }
+
+        // Download QR Code as image
+        function downloadQR(elementId, filename) {
+            const qrElement = document.getElementById(elementId).querySelector('canvas');
+            if (!qrElement) {
+                alert('QR Code is still generating, please wait...');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = qrElement.toDataURL('image/png');
+            link.download = filename + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
 
         // Form submission handler
         document.getElementById('checkinForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Get form values
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
@@ -340,20 +633,17 @@
             const department = document.getElementById('department').value.trim();
             const notes = document.getElementById('notes').value.trim();
 
-            // Validation
             if (!fullName || !email || !visitReason || !hostName) {
                 showError();
                 return;
             }
 
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 showError();
                 return;
             }
 
-            // Create visitor object
             const visitor = {
                 id: Date.now(),
                 fullName,
@@ -368,38 +658,28 @@
                 checkInTime: new Date().toLocaleString()
             };
 
-            // Add to visitors array
             visitors.unshift(visitor);
-
-            // Save to localStorage
             localStorage.setItem('jinjaCollegeVisitors', JSON.stringify(visitors));
 
-            // Show success message
             showSuccess();
-
-            // Reset form
             document.getElementById('checkinForm').reset();
-
-            // Update visitor list
             displayVisitors();
 
-            // Hide success message after 3 seconds
             setTimeout(() => {
                 document.getElementById('successMsg').style.display = 'none';
             }, 3000);
         });
 
-        // Display visitors function
+        // Display visitors
         function displayVisitors() {
+            const listContent = document.getElementById('visitorListContent');
+            
             if (visitors.length === 0) {
-                document.getElementById('visitorList').style.display = 'none';
+                listContent.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No visitors checked in yet</p>';
                 return;
             }
 
-            document.getElementById('visitorList').style.display = 'block';
-            const listContent = document.getElementById('visitorListContent');
             listContent.innerHTML = '';
-
             visitors.forEach(visitor => {
                 const visitorHTML = `
                     <div class="visitor-item">
@@ -418,7 +698,6 @@
             });
         }
 
-        // Show/Hide message functions
         function showSuccess() {
             document.getElementById('successMsg').style.display = 'block';
             document.getElementById('errorMsg').style.display = 'none';
@@ -428,9 +707,6 @@
             document.getElementById('errorMsg').style.display = 'block';
             document.getElementById('successMsg').style.display = 'none';
         }
-
-        // Initialize on page load
-        window.addEventListener('load', displayVisitors);
     </script>
 </body>
 </html>
