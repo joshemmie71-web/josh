@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jinja College - Smart Visitor Check-In System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,10 +13,76 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .navbar-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .main-container {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,38 +91,66 @@
 
         .container {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            max-width: 700px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
             width: 100%;
-            padding: 40px;
+            padding: 50px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .institution-header {
             text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 15px;
+            margin-bottom: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
         }
 
         .institution-logo {
-            font-size: 40px;
-            margin-bottom: 10px;
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .institution-name {
-            color: #667eea;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .institution-subtitle {
-            color: #999;
-            font-size: 12px;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            opacity: 0.95;
+        }
+
+        .logo-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin: 10px auto;
+            display: block;
         }
 
         .header {
@@ -64,22 +159,26 @@
         }
 
         .header h1 {
-            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
-            font-size: 26px;
+            font-size: 32px;
         }
 
         .header p {
             color: #666;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
-            border-bottom: 2px solid #eee;
+            border-bottom: 3px solid #f0f0f0;
             flex-wrap: wrap;
+            overflow-x: auto;
         }
 
         .tab-btn {
@@ -91,10 +190,14 @@
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
+            font-size: 14px;
         }
 
         .tab-btn.active {
-            color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             border-bottom-color: #667eea;
         }
 
@@ -104,67 +207,12 @@
 
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .qr-section {
-            text-align: center;
-            margin: 30px 0;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 2px dashed #667eea;
-        }
-
-        .qr-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .qr-container {
-            display: flex;
-            justify-content: center;
-            margin: 15px 0;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .qr-code-box {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .qr-code-box canvas {
-            border: 1px solid #ddd;
-            padding: 5px;
-            border-radius: 4px;
-        }
-
-        .qr-label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .qr-download-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .qr-download-btn:hover {
-            background: #764ba2;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .form-group {
@@ -175,23 +223,24 @@
             display: block;
             margin-bottom: 8px;
             color: #333;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
         }
 
         input, select, textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: linear-gradient(to bottom, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
         }
 
         textarea {
@@ -213,9 +262,9 @@
 
         button {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -225,176 +274,188 @@
         .btn-submit {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
         }
 
         .btn-reset {
-            background: #f0f0f0;
-            color: #333;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
         }
 
         .btn-reset:hover {
-            background: #e0e0e0;
+            transform: translateY(-3px);
         }
 
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
         }
 
         .btn-secondary:hover {
-            background: #e0e0e0;
+            transform: translateY(-3px);
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: linear-gradient(135deg, #f5576c 0%, #ef4444 100%);
             color: white;
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            transform: translateY(-3px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
         }
 
         .success-message {
             display: none;
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
+            border-left: 4px solid #10b981;
+            animation: slideIn 0.3s ease;
         }
 
         .error-message {
             display: none;
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             color: #721c24;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
+            border-left: 4px solid #ef4444;
+            animation: slideIn 0.3s ease;
         }
 
         .info-message {
-            background: #e7f3ff;
+            background: linear-gradient(135deg, #e7f3ff 0%, #b6d4fe 100%);
             color: #0056b3;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #b6d4fe;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            border: 2px dashed #667eea;
+        }
+
+        .qr-section h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .qr-code-box {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .qr-code-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .qr-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
         }
 
         .visitor-list {
             margin-top: 40px;
             padding-top: 30px;
-            border-top: 2px solid #eee;
+            border-top: 2px solid #f0f0f0;
         }
 
         .visitor-list h2 {
-            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 20px;
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .visitor-item {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .visitor-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
         }
 
         .visitor-item p {
-            margin: 5px 0;
+            margin: 6px 0;
             color: #555;
             font-size: 14px;
         }
 
         .visitor-item strong {
-            color: #333;
-        }
-
-        .visitor-time {
-            color: #999;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        .institution-badge {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-
-        .qr-info {
-            background: #e7f3ff;
-            border-left: 4px solid #667eea;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #333;
-        }
-
-        .qr-info strong {
-            color: #667eea;
-        }
-
-        .admin-list {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .admin-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border-left: 3px solid #667eea;
-        }
-
-        .admin-info {
-            flex: 1;
-        }
-
-        .admin-info p {
-            margin: 3px 0;
-            color: #555;
-            font-size: 13px;
-        }
-
-        .admin-info strong {
-            color: #333;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .admin-actions button {
-            padding: 6px 12px;
-            font-size: 12px;
-            flex: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .notification-badge {
             display: inline-block;
-            background: #dc3545;
+            background: linear-gradient(135deg, #ef4444 0%, #f5576c 100%);
             color: white;
             border-radius: 50%;
             width: 24px;
@@ -406,36 +467,53 @@
             margin-left: 10px;
         }
 
-        .notification-item {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+        .admin-list {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .admin-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .notification-item.read {
-            background: #e2e3e5;
-            border-left-color: #6c757d;
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
-        .notification-content {
-            flex: 1;
+        .settings-card {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
         }
 
-        .notification-content p {
-            margin: 3px 0;
-            color: #333;
-            font-size: 13px;
+        .settings-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            transform: translateY(-3px);
         }
 
-        .notification-time {
-            color: #666;
-            font-size: 11px;
-            margin-top: 5px;
+        .settings-card h4 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-size: 16px;
         }
 
         .toggle-switch {
@@ -459,7 +537,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background: linear-gradient(90deg, #e0e0e0 0%, #d0d0d0 100%);
             transition: 0.4s;
             border-radius: 24px;
         }
@@ -477,42 +555,35 @@
         }
 
         input:checked + .slider {
-            background-color: #667eea;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
 
         input:checked + .slider:before {
             transform: translateX(26px);
         }
 
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .settings-card {
-            background: #f9f9f9;
+        .footer {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
             padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
+            margin-top: auto;
+            font-size: 14px;
         }
 
-        .settings-card h4 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 16px;
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
         }
 
-        .settings-card p {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 10px;
+        .footer a:hover {
+            text-decoration: underline;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .container {
-                padding: 20px;
+                padding: 25px;
             }
 
             .form-row {
@@ -527,13 +598,10 @@
                 font-size: 24px;
             }
 
-            .tabs {
-                flex-wrap: wrap;
-            }
-
-            .tab-btn {
-                padding: 10px 15px;
-                font-size: 14px;
+            .navbar-links {
+                gap: 8px;
+                width: 100%;
+                justify-content: flex-end;
             }
 
             .settings-grid {
@@ -543,301 +611,320 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="institution-header">
-            <div class="institution-logo">🎓</div>
-            <div class="institution-name">JINJA COLLEGE</div>
-            <div class="institution-subtitle">Visitor Management System</div>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="navbar-brand">
+            🎓 Jinja College
         </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('checkin')">✓ Check-In</button>
-            <button class="tab-btn" onclick="switchTab('qr')">📱 QR Codes</button>
-            <button class="tab-btn" onclick="switchTab('notifications')">🔔 Notifications <span class="notification-badge" id="notifBadge" style="display:none;">0</span></button>
-            <button class="tab-btn" onclick="switchTab('admin')">⚙️ Admin Panel</button>
-            <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
+        <div class="navbar-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="about.html">ℹ️ About</a>
+            <a href="help.html">❓ Help</a>
+            <a href="contact.html">📞 Contact</a>
         </div>
+    </div>
 
-        <!-- Check-In Tab -->
-        <div id="checkin" class="tab-content active">
-            <div class="header">
-                <h1>🔐 Smart Check-In</h1>
-                <p>Welcome to Jinja College! Please complete the form below to proceed</p>
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="container">
+            <div class="institution-header">
+                <div class="institution-logo">🎓</div>
+                <div class="institution-name">JINJA COLLEGE</div>
+                <div class="institution-subtitle">Smart Visitor Management System</div>
+                <p style="margin-top: 10px; font-size: 13px; opacity: 0.95;">Strive to Excel</p>
             </div>
 
-            <div class="success-message" id="successMsg">
-                ✓ Successfully checked in at Jinja College!
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('checkin')">✓ Check-In</button>
+                <button class="tab-btn" onclick="switchTab('qr')">📱 QR Codes</button>
+                <button class="tab-btn" onclick="switchTab('notifications')">🔔 Alerts <span class="notification-badge" id="notifBadge" style="display:none;">0</span></button>
+                <button class="tab-btn" onclick="switchTab('admin')">⚙️ Admin</button>
+                <button class="tab-btn" onclick="switchTab('visitors')">👥 Visitors</button>
             </div>
 
-            <div class="error-message" id="errorMsg">
-                ✗ Please fill in all required fields correctly
-            </div>
-
-            <form id="checkinForm">
-                <div class="form-group">
-                    <label for="fullName">Full Name <span class="institution-badge">Jinja College</span> *</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+            <!-- Check-In Tab -->
+            <div id="checkin" class="tab-content active">
+                <div class="header">
+                    <h1>🔐 Welcome to Jinja College</h1>
+                    <p>Complete your visitor check-in in seconds</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                <div class="success-message" id="successMsg">
+                    ✓ Successfully checked in at Jinja College! Welcome!
                 </div>
 
-                <div class="form-row">
+                <div class="error-message" id="errorMsg">
+                    ✗ Please fill in all required fields correctly
+                </div>
+
+                <form id="checkinForm">
                     <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="+256 ..." >
+                        <label for="fullName">👤 Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="company">Company/Organization</label>
-                        <input type="text" id="company" name="company" placeholder="Your organization">
+                        <label for="email">📧 Email Address *</label>
+                        <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">📱 Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+256 ..." >
+                        </div>
+                        <div class="form-group">
+                            <label for="company">🏢 Company/Organization</label>
+                            <input type="text" id="company" name="company" placeholder="Your organization">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visitReason">📋 Reason for Visit *</label>
+                            <select id="visitReason" name="visitReason" required>
+                                <option value="">-- Select Reason --</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="delivery">Delivery</option>
+                                <option value="interview">Interview</option>
+                                <option value="tour">Facility Tour</option>
+                                <option value="academic">Academic Purpose</option>
+                                <option value="event">Event/Conference</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hostName">👤 Host/Person to Meet *</label>
+                            <input type="text" id="hostName" name="hostName" placeholder="Department/Person name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">🏛️ Department/Office Visiting</label>
+                        <input type="text" id="department" name="department" placeholder="e.g., Administration, Finance">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">📝 Additional Notes</label>
+                        <textarea id="notes" name="notes" placeholder="Any special requirements..."></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-submit">✓ Check In</button>
+                        <button type="reset" class="btn-reset">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- QR Code Tab -->
+            <div id="qr" class="tab-content">
+                <div class="header">
+                    <h1>📱 QR Code System</h1>
+                    <p>Scan to access our visitor check-in system</p>
+                </div>
+
+                <div class="info-message">
+                    <strong>ℹ️ Instructions:</strong> Print these QR codes and place them at entrance points, reception areas, and around campus. Visitors can scan with their phones for instant access.
+                </div>
+
+                <div class="qr-section">
+                    <h3>📌 Main Check-In QR Code</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Scan to start visitor check-in</p>
+                    <div class="qr-code-box">
+                        <div id="qrMain"></div>
+                        <button class="btn-secondary" onclick="downloadQR('qrMain', 'jinja-college-main')">⬇️ Download</button>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="qr-section">
+                    <h3>🏢 Department QR Codes</h3>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Department-specific check-in codes</p>
+                    <div class="qr-container">
+                        <div class="qr-code-box">
+                            <div id="qrAdmissions"></div>
+                            <span class="qr-label">Admissions</span>
+                            <button class="btn-secondary" onclick="downloadQR('qrAdmissions', 'admissions')">⬇️ Download</button>
+                        </div>
+                        <div class="qr-code-box">
+                            <div id="qrRegistrar"></div>
+                            <span class="qr-label">Registrar</span>
+                            <button class="btn-secondary" onclick="downloadQR('qrRegistrar', 'registrar')">⬇️ Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div id="notifications" class="tab-content">
+                <div class="header">
+                    <h1>🔔 Real-Time Alerts</h1>
+                    <p>Visitor check-in notifications</p>
+                </div>
+
+                <div class="info-message">
+                    <strong>ℹ️ Note:</strong> Admins receive real-time notifications when visitors check in. Configure in the Admin Panel.
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <button class="btn-success" onclick="markAllNotificationsRead()" style="width: 100%;">✓ Mark All as Read</button>
+                </div>
+
+                <div id="notificationsContainer">
+                    <p style="text-align: center; color: #999; padding: 20px;">🔔 No notifications yet</p>
+                </div>
+            </div>
+
+            <!-- Admin Panel Tab -->
+            <div id="admin" class="tab-content">
+                <div class="header">
+                    <h1>⚙️ Admin Control Center</h1>
+                    <p>Manage system settings and notifications</p>
+                </div>
+
+                <div class="info-message">
+                    <strong>🔐 Security:</strong> Please enter the admin password to access settings.
+                </div>
+
+                <div class="form-group" id="adminPasswordForm">
+                    <label for="adminPassword">🔑 Admin Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                    <button class="btn-submit" onclick="verifyAdminPassword()" style="width: 100%; margin-top: 10px;">Verify Access</button>
+                </div>
+
+                <div id="adminContent" style="display: none;">
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h4>📧 Email Notifications</h4>
+                            <p>Send alerts to admin emails</p>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailNotifToggle" onchange="toggleEmailNotifications()">
+                                <span class="slider"></span>
+                            </label>
+                            <p style="margin-top: 10px;"><strong>Status:</strong> <span id="emailNotifStatus">Disabled</span></p>
+                        </div>
+
+                        <div class="settings-card">
+                            <h4>📱 Browser Notifications</h4>
+                            <p>Get instant pop-up alerts</p>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="browserNotifToggle" onchange="toggleBrowserNotifications()">
+                                <span class="slider"></span>
+                            </label>
+                            <p style="margin-top: 10px;"><strong>Status:</strong> <span id="browserNotifStatus">Disabled</span></p>
+                        </div>
+
+                        <div class="settings-card">
+                            <h4>📊 Analytics Tracking</h4>
+                            <p>Track visitor statistics</p>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="analyticsToggle" checked onchange="toggleAnalytics()">
+                                <span class="slider"></span>
+                            </label>
+                            <p style="margin-top: 10px;"><strong>Status:</strong> <span id="analyticsStatus">Enabled</span></p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="color: #333; margin-bottom: 15px;">👥 Manage Admin Users</h3>
+                        <div class="admin-list" id="adminList">
+                            <p style="text-align: center; color: #999;">No admins added yet</p>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="visitReason">Reason for Visit at Jinja College *</label>
-                        <select id="visitReason" name="visitReason" required>
-                            <option value="">-- Select Reason --</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="delivery">Delivery</option>
-                            <option value="interview">Interview</option>
-                            <option value="tour">Facility Tour</option>
-                            <option value="academic">Academic Purpose</option>
-                            <option value="event">Event/Conference</option>
-                            <option value="other">Other</option>
+                        <label for="adminEmail">📧 Add Admin Email</label>
+                        <input type="email" id="adminEmail" placeholder="admin@jinjacollege.edu" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminName">👤 Admin Name</label>
+                        <input type="text" id="adminName" placeholder="Full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminDept">🏢 Department</label>
+                        <select id="adminDept">
+                            <option value="">-- Select Department --</option>
+                            <option value="administration">Administration</option>
+                            <option value="security">Security</option>
+                            <option value="admissions">Admissions</option>
+                            <option value="registrar">Registrar</option>
+                            <option value="finance">Finance</option>
+                            <option value="academic">Academic Affairs</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="hostName">Host/Person to Meet at Jinja College *</label>
-                        <input type="text" id="hostName" name="hostName" placeholder="Department/Person name" required>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="department">Department/Office Visiting</label>
-                    <input type="text" id="department" name="department" placeholder="e.g., Administration, Finance, Academic Affairs">
-                </div>
-
-                <div class="form-group">
-                    <label for="notes">Additional Notes</label>
-                    <textarea id="notes" name="notes" placeholder="Any special requirements or information for Jinja College staff..."></textarea>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn-submit">Check In to Jinja College</button>
-                    <button type="reset" class="btn-reset">Clear</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- QR Code Tab -->
-        <div id="qr" class="tab-content">
-            <div class="header">
-                <h1>🔐 Smart Check-In QR Codes</h1>
-                <p>Scan to access Jinja College visitor check-in system</p>
-            </div>
-
-            <div class="qr-info">
-                <strong>ℹ️ How to use:</strong> Print or display these QR codes at entrance areas, reception desks, and around the Jinja College campus. Visitors can scan them with their phones to instantly access the check-in system.
-            </div>
-
-            <div class="qr-section">
-                <h3>Main Check-In QR Code</h3>
-                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Scan this code to access the full check-in form</p>
-                <div class="qr-code-box">
-                    <div id="qrMain"></div>
-                    <button class="qr-download-btn" onclick="downloadQR('qrMain', 'jinja-college-checkin')">⬇️ Download QR</button>
-                </div>
-            </div>
-
-            <div class="qr-section">
-                <h3>Specific Department QR Codes</h3>
-                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Create custom QR codes for different departments</p>
-                
-                <div class="form-group">
-                    <label for="customUrl">Create Custom QR Code (Optional)</label>
-                    <input type="url" id="customUrl" placeholder="https://example.com or any URL" value="">
-                </div>
-                <button class="btn-submit" onclick="generateCustomQR()" style="width: 100%; margin-bottom: 20px;">Generate Custom QR</button>
-
-                <div class="qr-container" id="customQRContainer">
-                    <div class="qr-code-box">
-                        <div id="qrAdmissions"></div>
-                        <span class="qr-label">Admissions Office</span>
-                        <button class="qr-download-btn" onclick="downloadQR('qrAdmissions', 'admissions-qr')">⬇️ Download</button>
-                    </div>
-                    <div class="qr-code-box">
-                        <div id="qrRegistrar"></div>
-                        <span class="qr-label">Registrar Office</span>
-                        <button class="qr-download-btn" onclick="downloadQR('qrRegistrar', 'registrar-qr')">⬇️ Download</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Tab -->
-        <div id="notifications" class="tab-content">
-            <div class="header">
-                <h1>🔔 Visitor Notifications</h1>
-                <p>Real-time notifications for new visitor check-ins</p>
-            </div>
-
-            <div class="info-message">
-                <strong>ℹ️ Note:</strong> You must add admin emails in the Admin Panel to receive notifications. Notifications are sent when visitors check in.
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <button class="btn-submit" onclick="markAllNotificationsRead()" style="width: 100%;">✓ Mark All as Read</button>
-            </div>
-
-            <div id="notificationsContainer">
-                <p style="text-align: center; color: #999; padding: 20px;">No notifications yet</p>
-            </div>
-        </div>
-
-        <!-- Admin Panel Tab -->
-        <div id="admin" class="tab-content">
-            <div class="header">
-                <h1>⚙️ Admin Panel</h1>
-                <p>Manage admin settings and notifications</p>
-            </div>
-
-            <div class="info-message">
-                <strong>ℹ️ Password Protected:</strong> Please enter the admin password to access settings.
-            </div>
-
-            <div class="form-group" id="adminPasswordForm">
-                <label for="adminPassword">Admin Password</label>
-                <input type="password" id="adminPassword" placeholder="Enter admin password">
-                <button class="btn-submit" onclick="verifyAdminPassword()" style="width: 100%; margin-top: 10px;">Verify</button>
-            </div>
-
-            <div id="adminContent" style="display: none;">
-                <div class="settings-grid">
-                    <div class="settings-card">
-                        <h4>📧 Email Notifications</h4>
-                        <p>Manage which admins receive visitor check-in notifications</p>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="emailNotifToggle" onchange="toggleEmailNotifications()">
-                            <span class="slider"></span>
-                        </label>
-                        <p style="margin-top: 10px;"><strong>Status:</strong> <span id="emailNotifStatus">Disabled</span></p>
-                    </div>
-
-                    <div class="settings-card">
-                        <h4>📱 Browser Notifications</h4>
-                        <p>Get instant notifications in your browser</p>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="browserNotifToggle" onchange="toggleBrowserNotifications()">
-                            <span class="slider"></span>
-                        </label>
-                        <p style="margin-top: 10px;"><strong>Status:</strong> <span id="browserNotifStatus">Disabled</span></p>
-                    </div>
-
-                    <div class="settings-card">
-                        <h4>💾 Auto-Save Settings</h4>
-                        <p>Automatically save admin configurations</p>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="autoSaveToggle" checked onchange="toggleAutoSave()">
-                            <span class="slider"></span>
-                        </label>
-                        <p style="margin-top: 10px;"><strong>Status:</strong> <span id="autoSaveStatus">Enabled</span></p>
-                    </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <h3 style="color: #333; margin-bottom: 15px;">📋 Admin Email List</h3>
-                    <div class="admin-list" id="adminList">
-                        <p style="text-align: center; color: #999;">No admins added yet</p>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="adminEmail">Add Admin Email</label>
-                    <input type="email" id="adminEmail" placeholder="admin@jinjacollege.edu" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="adminName">Admin Name</label>
-                    <input type="text" id="adminName" placeholder="Full name">
-                </div>
-
-                <div class="form-group">
-                    <label for="department">Department</label>
-                    <select id="department">
-                        <option value="">-- Select Department --</option>
-                        <option value="administration">Administration</option>
-                        <option value="security">Security</option>
-                        <option value="admissions">Admissions</option>
-                        <option value="registrar">Registrar</option>
-                        <option value="finance">Finance</option>
-                        <option value="academic">Academic Affairs</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-submit" onclick="addAdmin()">Add Admin</button>
-                    <button class="btn-reset" onclick="clearAdminForm()">Clear</button>
-                </div>
-
-                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                    <h4 style="color: #333; margin-bottom: 15px;">⚡ Quick Actions</h4>
                     <div class="button-group">
-                        <button class="btn-secondary" onclick="exportVisitorData()">📥 Export Visitor Data</button>
-                        <button class="btn-secondary" onclick="clearAllData()">🗑️ Clear All Data</button>
+                        <button class="btn-success" onclick="addAdmin()">➕ Add Admin</button>
+                        <button class="btn-reset" onclick="clearAdminForm()">Clear</button>
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; border-left: 4px solid #f59e0b;">
+                        <h4 style="color: #92400e; margin-bottom: 15px;">⚡ Advanced Actions</h4>
+                        <div class="button-group">
+                            <button class="btn-secondary" onclick="exportVisitorData()">📥 Export Data</button>
+                            <button class="btn-danger" onclick="clearAllData()">🗑️ Clear Data</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn-danger" onclick="logout()" style="width: 100%;">🚪 Logout</button>
                     </div>
                 </div>
-
-                <div style="margin-top: 20px;">
-                    <button class="btn-danger" onclick="logout()" style="width: 100%;">🚪 Logout</button>
-                </div>
             </div>
-        </div>
 
-        <!-- Visitors Tab -->
-        <div id="visitors" class="tab-content">
-            <div class="visitor-list">
-                <h2>Recent Check-Ins at Jinja College</h2>
-                <div id="visitorListContent" style="min-height: 100px;">
-                    <p style="text-align: center; color: #999; padding: 20px;">No visitors checked in yet</p>
+            <!-- Visitors Tab -->
+            <div id="visitors" class="tab-content">
+                <div class="visitor-list">
+                    <h2>👥 Recent Visitor Check-Ins</h2>
+                    <div id="visitorListContent" style="min-height: 100px;">
+                        <p style="text-align: center; color: #999; padding: 20px;">No visitors checked in yet</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2024 Jinja College | Smart Visitor Management System | <a href="privacy.html">Privacy Policy</a></p>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script>
-        // Constants
-        const ADMIN_PASSWORD = "jinja@2024"; // Change this to a secure password
-        const DEFAULT_ADMINS = [];
-        
-        // Initialize data from localStorage
+        const ADMIN_PASSWORD = "jinja@2024";
         let visitors = JSON.parse(localStorage.getItem('jinjaCollegeVisitors')) || [];
-        let admins = JSON.parse(localStorage.getItem('jinjaCollegeAdmins')) || DEFAULT_ADMINS;
+        let admins = JSON.parse(localStorage.getItem('jinjaCollegeAdmins')) || [];
         let notifications = JSON.parse(localStorage.getItem('jinjaCollegeNotifications')) || [];
+        let analytics = JSON.parse(localStorage.getItem('jinjaCollegeAnalytics')) || { visits: 0, checkins: 0 };
         let settings = JSON.parse(localStorage.getItem('jinjaCollegeSettings')) || {
             emailNotifications: false,
             browserNotifications: false,
-            autoSave: true
+            analytics: true
         };
         
         let isAdminLoggedIn = false;
         let pageURL = window.location.href;
 
-        // Initialize on page load
         window.addEventListener('load', function() {
             generateQRCodes();
             displayVisitors();
             displayNotifications();
             updateNotificationBadge();
             loadSettings();
+            trackAnalytics();
         });
 
-        // ==================== QR Code Functions ====================
+        // Analytics
+        function trackAnalytics() {
+            if (settings.analytics) {
+                analytics.visits++;
+                localStorage.setItem('jinjaCollegeAnalytics', JSON.stringify(analytics));
+            }
+        }
+
+        // QR Code Functions
         function generateQRCodes() {
             try {
                 new QRCode(document.getElementById("qrMain"), {
@@ -867,37 +954,8 @@
                     correctLevel: QRCode.CorrectLevel.H
                 });
             } catch(e) {
-                console.log("QR Code generation started");
+                console.log("QR Code generation in progress...");
             }
-        }
-
-        function generateCustomQR() {
-            const customUrl = document.getElementById('customUrl').value.trim();
-            if (!customUrl) {
-                alert('Please enter a URL');
-                return;
-            }
-
-            const container = document.getElementById('customQRContainer');
-            const customBox = document.createElement('div');
-            customBox.className = 'qr-code-box';
-            customBox.innerHTML = `
-                <div id="qrCustom"></div>
-                <span class="qr-label">Custom QR Code</span>
-                <button class="qr-download-btn" onclick="downloadQR('qrCustom', 'custom-qr')">⬇️ Download</button>
-            `;
-            container.appendChild(customBox);
-
-            setTimeout(() => {
-                new QRCode(document.getElementById("qrCustom"), {
-                    text: customUrl,
-                    width: 200,
-                    height: 200,
-                    colorDark: "#667eea",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            }, 100);
         }
 
         function downloadQR(elementId, filename) {
@@ -915,7 +973,7 @@
             document.body.removeChild(link);
         }
 
-        // ==================== Check-In Functions ====================
+        // Check-In Functions
         document.getElementById('checkinForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -956,17 +1014,19 @@
             visitors.unshift(visitor);
             localStorage.setItem('jinjaCollegeVisitors', JSON.stringify(visitors));
 
-            // Create notification for admins
             createNotification(fullName, visitReason, hostName, department);
 
-            // Send email notifications if enabled
             if (settings.emailNotifications && admins.length > 0) {
                 sendEmailNotifications(visitor);
             }
 
-            // Send browser notifications if enabled
             if (settings.browserNotifications) {
                 sendBrowserNotification(fullName, visitReason);
+            }
+
+            if (settings.analytics) {
+                analytics.checkins++;
+                localStorage.setItem('jinjaCollegeAnalytics', JSON.stringify(analytics));
             }
 
             showSuccess();
@@ -990,7 +1050,7 @@
             document.getElementById('successMsg').style.display = 'none';
         }
 
-        // ==================== Notification Functions ====================
+        // Notification Functions
         function createNotification(visitorName, reason, host, department) {
             const notification = {
                 id: Date.now(),
@@ -1010,21 +1070,21 @@
             const container = document.getElementById('notificationsContainer');
             
             if (notifications.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No notifications yet</p>';
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">🔔 No notifications yet</p>';
                 return;
             }
 
             container.innerHTML = '';
             notifications.forEach(notif => {
                 const notifHTML = `
-                    <div class="notification-item ${notif.read ? 'read' : ''}">
-                        <div class="notification-content">
-                            <p><strong>${notif.visitorName}</strong> checked in for <strong>${notif.reason}</strong></p>
-                            <p>Host: ${notif.host} ${notif.department ? '| Department: ' + notif.department : ''}</p>
-                            <div class="notification-time">${notif.timestamp}</div>
+                    <div style="background: linear-gradient(135deg, ${notif.read ? '#e5e7eb' : '#fef3c7'} 0%, ${notif.read ? '#d1d5db' : '#fde68a'} 100%); padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid ${notif.read ? '#6b7280' : '#f59e0b'}; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: #333; margin: 5px 0;"><strong>${notif.visitorName}</strong> checked in</p>
+                            <p style="color: #666; margin: 5px 0; font-size: 13px;">📋 ${notif.reason} | 👤 ${notif.host} ${notif.department ? '| 🏢 ' + notif.department : ''}</p>
+                            <p style="color: #999; margin: 5px 0; font-size: 12px;">⏰ ${notif.timestamp}</p>
                         </div>
                         <div style="display: flex; gap: 5px;">
-                            <button class="btn-secondary" onclick="markNotificationRead(${notif.id})" style="padding: 6px 10px; font-size: 12px; flex: none;">✓</button>
+                            <button class="btn-success" onclick="markNotificationRead(${notif.id})" style="padding: 6px 10px; font-size: 12px; flex: none;">✓</button>
                             <button class="btn-danger" onclick="deleteNotification(${notif.id})" style="padding: 6px 10px; font-size: 12px; flex: none;">✕</button>
                         </div>
                     </div>
@@ -1068,33 +1128,6 @@
             }
         }
 
-        function sendEmailNotifications(visitor) {
-            // This would require a backend service
-            const emailText = `
-New Visitor Check-In at Jinja College
-
-Name: ${visitor.fullName}
-Email: ${visitor.email}
-Phone: ${visitor.phone || 'N/A'}
-Organization: ${visitor.company || 'N/A'}
-Reason: ${visitor.visitReason}
-Host/Person: ${visitor.hostName}
-Department: ${visitor.department || 'N/A'}
-Notes: ${visitor.notes || 'N/A'}
-Check-In Time: ${visitor.checkInTime}
-
---- This is an automated notification from Jinja College Visitor Management System ---
-            `;
-
-            // Store for email service to process
-            console.log("Email notification would be sent to admins:", emailText);
-            
-            // You can integrate with services like:
-            // - EmailJS (emailjs.com)
-            // - Formspree
-            // - Your own backend API
-        }
-
         function sendBrowserNotification(visitorName, reason) {
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('🔔 New Visitor Check-In', {
@@ -1104,7 +1137,11 @@ Check-In Time: ${visitor.checkInTime}
             }
         }
 
-        // ==================== Admin Functions ====================
+        function sendEmailNotifications(visitor) {
+            console.log("Email notification for:", visitor.fullName);
+        }
+
+        // Admin Functions
         function verifyAdminPassword() {
             const password = document.getElementById('adminPassword').value;
             
@@ -1130,7 +1167,7 @@ Check-In Time: ${visitor.checkInTime}
         function addAdmin() {
             const email = document.getElementById('adminEmail').value.trim();
             const name = document.getElementById('adminName').value.trim();
-            const dept = document.getElementById('department').value;
+            const dept = document.getElementById('adminDept').value;
 
             if (!email || !name) {
                 alert('Please fill in all required fields');
@@ -1169,7 +1206,7 @@ Check-In Time: ${visitor.checkInTime}
         function clearAdminForm() {
             document.getElementById('adminEmail').value = '';
             document.getElementById('adminName').value = '';
-            document.getElementById('department').value = '';
+            document.getElementById('adminDept').value = '';
         }
 
         function displayAdminList() {
@@ -1187,11 +1224,9 @@ Check-In Time: ${visitor.checkInTime}
                         <div class="admin-info">
                             <p><strong>${admin.name}</strong></p>
                             <p>${admin.email}</p>
-                            <p style="font-size: 12px; color: #999;">📍 ${admin.department} | Added: ${admin.addedDate}</p>
+                            <p style="font-size: 12px; color: #999;">📍 ${admin.department}</p>
                         </div>
-                        <div class="admin-actions">
-                            <button class="btn-danger" onclick="removeAdmin(${admin.id})">Remove</button>
-                        </div>
+                        <button class="btn-danger" onclick="removeAdmin(${admin.id})" style="padding: 6px 12px; font-size: 12px; flex: none;">Remove</button>
                     </div>
                 `;
                 container.innerHTML += adminHTML;
@@ -1200,9 +1235,7 @@ Check-In Time: ${visitor.checkInTime}
 
         function toggleEmailNotifications() {
             settings.emailNotifications = document.getElementById('emailNotifToggle').checked;
-            if (settings.autoSave) {
-                localStorage.setItem('jinjaCollegeSettings', JSON.stringify(settings));
-            }
+            localStorage.setItem('jinjaCollegeSettings', JSON.stringify(settings));
             updateSettingsDisplay();
         }
 
@@ -1224,20 +1257,15 @@ Check-In Time: ${visitor.checkInTime}
                             }
                         });
                     }
-                } else {
-                    alert('Browser notifications not supported');
-                    document.getElementById('browserNotifToggle').checked = false;
                 }
             }
 
-            if (settings.autoSave) {
-                localStorage.setItem('jinjaCollegeSettings', JSON.stringify(settings));
-            }
+            localStorage.setItem('jinjaCollegeSettings', JSON.stringify(settings));
             updateSettingsDisplay();
         }
 
-        function toggleAutoSave() {
-            settings.autoSave = document.getElementById('autoSaveToggle').checked;
+        function toggleAnalytics() {
+            settings.analytics = document.getElementById('analyticsToggle').checked;
             localStorage.setItem('jinjaCollegeSettings', JSON.stringify(settings));
             updateSettingsDisplay();
         }
@@ -1245,7 +1273,7 @@ Check-In Time: ${visitor.checkInTime}
         function loadSettings() {
             document.getElementById('emailNotifToggle').checked = settings.emailNotifications;
             document.getElementById('browserNotifToggle').checked = settings.browserNotifications;
-            document.getElementById('autoSaveToggle').checked = settings.autoSave;
+            document.getElementById('analyticsToggle').checked = settings.analytics;
             displayAdminList();
             updateSettingsDisplay();
         }
@@ -1253,7 +1281,7 @@ Check-In Time: ${visitor.checkInTime}
         function updateSettingsDisplay() {
             document.getElementById('emailNotifStatus').textContent = settings.emailNotifications ? '✓ Enabled' : 'Disabled';
             document.getElementById('browserNotifStatus').textContent = settings.browserNotifications ? '✓ Enabled' : 'Disabled';
-            document.getElementById('autoSaveStatus').textContent = settings.autoSave ? '✓ Enabled' : 'Disabled';
+            document.getElementById('analyticsStatus').textContent = settings.analytics ? '✓ Enabled' : 'Disabled';
         }
 
         function exportVisitorData() {
@@ -1273,11 +1301,11 @@ Check-In Time: ${visitor.checkInTime}
             link.download = 'jinja-college-visitors-' + new Date().toISOString().split('T')[0] + '.csv';
             link.click();
 
-            alert('✓ Visitor data exported successfully!');
+            alert('✓ Data exported successfully!');
         }
 
         function clearAllData() {
-            if (confirm('⚠️ This will delete ALL visitor data and notifications. Are you sure?')) {
+            if (confirm('⚠️ Delete ALL visitor data?')) {
                 if (confirm('Are you REALLY sure? This cannot be undone.')) {
                     visitors = [];
                     notifications = [];
@@ -1291,7 +1319,7 @@ Check-In Time: ${visitor.checkInTime}
             }
         }
 
-        // ==================== Tab Functions ====================
+        // Tab Functions
         function switchTab(tabName) {
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
@@ -1303,7 +1331,7 @@ Check-In Time: ${visitor.checkInTime}
             event.target.classList.add('active');
         }
 
-        // ==================== Display Functions ====================
+        // Display Functions
         function displayVisitors() {
             const listContent = document.getElementById('visitorListContent');
             
@@ -1316,14 +1344,14 @@ Check-In Time: ${visitor.checkInTime}
             visitors.forEach(visitor => {
                 const visitorHTML = `
                     <div class="visitor-item">
-                        <p><strong>${visitor.fullName}</strong> - ${visitor.visitReason}</p>
-                        <p>Email: ${visitor.email}</p>
-                        ${visitor.phone ? `<p>Phone: ${visitor.phone}</p>` : ''}
-                        ${visitor.company ? `<p>Organization: ${visitor.company}</p>` : ''}
-                        <p>Meeting with: ${visitor.hostName}</p>
-                        ${visitor.department ? `<p>Department: ${visitor.department}</p>` : ''}
-                        ${visitor.notes ? `<p>Notes: ${visitor.notes}</p>` : ''}
-                        <div class="visitor-time">Checked in: ${visitor.checkInTime}</div>
+                        <p><strong>👤 ${visitor.fullName}</strong> - 📋 ${visitor.visitReason}</p>
+                        <p>📧 Email: ${visitor.email}</p>
+                        ${visitor.phone ? `<p>📱 Phone: ${visitor.phone}</p>` : ''}
+                        ${visitor.company ? `<p>🏢 Organization: ${visitor.company}</p>` : ''}
+                        <p>👤 Meeting with: ${visitor.hostName}</p>
+                        ${visitor.department ? `<p>🏛️ Department: ${visitor.department}</p>` : ''}
+                        ${visitor.notes ? `<p>📝 Notes: ${visitor.notes}</p>` : ''}
+                        <div class="visitor-time">⏰ Checked in: ${visitor.checkInTime}</div>
                         <div class="visitor-time" style="color: #667eea; margin-top: 5px;">📍 Jinja College</div>
                     </div>
                 `;
