@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinja College - Smart Visitor Check-In System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .institution-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .institution-name {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .institution-subtitle {
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .visitor-list {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .visitor-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .visitor-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .visitor-item p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .visitor-item strong {
+            color: #333;
+        }
+
+        .visitor-time {
+            color: #999;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .institution-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="institution-header">
+            <div class="institution-name">🎓 JINJA COLLEGE</div>
+            <div class="institution-subtitle">Official Visitor Management System</div>
+        </div>
+
+        <div class="header">
+            <h1>🔐 Smart Visitor Check-In</h1>
+            <p>Welcome to Jinja College! Please complete the form below</p>
+        </div>
+
+        <div class="success-message" id="successMsg">
+            ✓ Visitor checked in successfully at Jinja College!
+        </div>
+
+        <div class="error-message" id="errorMsg">
+            ✗ Please fill in all required fields
+        </div>
+
+        <form id="checkinForm">
+            <div class="form-group">
+                <label for="fullName">Full Name *</label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="company">Company/Organization</label>
+                    <input type="text" id="company" name="company">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="visitReason">Reason for Visit *</label>
+                    <select id="visitReason" name="visitReason" required>
+                        <option value="">-- Select --</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="interview">Interview</option>
+                        <option value="tour">Facility Tour</option>
+                        <option value="academic">Academic Purpose</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="hostName">Host/Person to Meet *</label>
+                    <input type="text" id="hostName" name="hostName" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Additional Notes</label>
+                <textarea id="notes" name="notes" placeholder="Any special requirements or information..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-submit">Check In</button>
+                <button type="reset" class="btn-reset">Clear</button>
+            </div>
+        </form>
+
+        <div class="visitor-list" id="visitorList" style="display: none;">
+            <h2>Recent Check-Ins at Jinja College</h2>
+            <div id="visitorListContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize visitors array from localStorage
+        let visitors = JSON.parse(localStorage.getItem('jinjaCollegeVisitors')) || [];
+
+        // Form submission handler
+        document.getElementById('checkinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const company = document.getElementById('company').value.trim();
+            const visitReason = document.getElementById('visitReason').value;
+            const hostName = document.getElementById('hostName').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            // Validation
+            if (!fullName || !email || !visitReason || !hostName) {
+                showError();
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError();
+                return;
+            }
+
+            // Create visitor object
+            const visitor = {
+                id: Date.now(),
+                fullName,
+                email,
+                phone,
+                company,
+                visitReason,
+                hostName,
+                notes,
+                institution: 'Jinja College',
+                checkInTime: new Date().toLocaleString()
+            };
+
+            // Add to visitors array
+            visitors.unshift(visitor);
+
+            // Save to localStorage
+            localStorage.setItem('jinjaCollegeVisitors', JSON.stringify(visitors));
+
+            // Show success message
+            showSuccess();
+
+            // Reset form
+            document.getElementById('checkinForm').reset();
+
+            // Update visitor list
+            displayVisitors();
+
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('successMsg').style.display = 'none';
+            }, 3000);
+        });
+
+        // Display visitors function
+        function displayVisitors() {
+            if (visitors.length === 0) {
+                document.getElementById('visitorList').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('visitorList').style.display = 'block';
+            const listContent = document.getElementById('visitorListContent');
+            listContent.innerHTML = '';
+
+            visitors.forEach(visitor => {
+                const visitorHTML = `
+                    <div class="visitor-item">
+                        <p><strong>${visitor.fullName}</strong> - ${visitor.visitReason}</p>
+                        <p>Email: ${visitor.email}</p>
+                        ${visitor.phone ? `<p>Phone: ${visitor.phone}</p>` : ''}
+                        ${visitor.company ? `<p>Organization: ${visitor.company}</p>` : ''}
+                        <p>Meeting with: ${visitor.hostName}</p>
+                        ${visitor.notes ? `<p>Notes: ${visitor.notes}</p>` : ''}
+                        <div class="visitor-time">Checked in: ${visitor.checkInTime}</div>
+                    </div>
+                `;
+                listContent.innerHTML += visitorHTML;
+            });
+        }
+
+        // Show/Hide message functions
+        function showSuccess() {
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function showError() {
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', displayVisitors);
+    </script>
+</body>
+</html>
