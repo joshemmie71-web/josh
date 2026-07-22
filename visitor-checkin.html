@@ -37,9 +37,14 @@
             padding-bottom: 15px;
         }
 
+        .institution-logo {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
         .institution-name {
             color: #667eea;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             letter-spacing: 1px;
             margin-bottom: 5px;
@@ -60,7 +65,7 @@
         .header h1 {
             color: #333;
             margin-bottom: 10px;
-            font-size: 28px;
+            font-size: 26px;
         }
 
         .header p {
@@ -198,6 +203,17 @@
             margin-top: 8px;
         }
 
+        .institution-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -212,7 +228,11 @@
             }
 
             .institution-name {
-                font-size: 20px;
+                font-size: 24px;
+            }
+
+            .institution-logo {
+                font-size: 35px;
             }
         }
     </style>
@@ -220,71 +240,78 @@
 <body>
     <div class="container">
         <div class="institution-header">
-            <div class="institution-name">🎓 JINJA COLLEGE</div>
-            <div class="institution-subtitle">Official Visitor Management System</div>
+            <div class="institution-logo">🎓</div>
+            <div class="institution-name">JINJA COLLEGE</div>
+            <div class="institution-subtitle">Visitor Management System</div>
         </div>
 
         <div class="header">
-            <h1>🔐 Smart Visitor Check-In</h1>
-            <p>Welcome to Jinja College! Please complete the form below</p>
+            <h1>🔐 Smart Check-In</h1>
+            <p>Welcome to Jinja College! Please complete the form below to proceed</p>
         </div>
 
         <div class="success-message" id="successMsg">
-            ✓ Visitor checked in successfully at Jinja College!
+            ✓ Successfully checked in at Jinja College!
         </div>
 
         <div class="error-message" id="errorMsg">
-            ✗ Please fill in all required fields
+            ✗ Please fill in all required fields correctly
         </div>
 
         <form id="checkinForm">
             <div class="form-group">
-                <label for="fullName">Full Name *</label>
-                <input type="text" id="fullName" name="fullName" required>
+                <label for="fullName">Full Name <span class="institution-badge">Jinja College</span> *</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone">
+                    <input type="tel" id="phone" name="phone" placeholder="+256 ..." >
                 </div>
                 <div class="form-group">
                     <label for="company">Company/Organization</label>
-                    <input type="text" id="company" name="company">
+                    <input type="text" id="company" name="company" placeholder="Your organization">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="visitReason">Reason for Visit *</label>
+                    <label for="visitReason">Reason for Visit at Jinja College *</label>
                     <select id="visitReason" name="visitReason" required>
-                        <option value="">-- Select --</option>
+                        <option value="">-- Select Reason --</option>
                         <option value="meeting">Meeting</option>
                         <option value="delivery">Delivery</option>
                         <option value="interview">Interview</option>
                         <option value="tour">Facility Tour</option>
                         <option value="academic">Academic Purpose</option>
+                        <option value="event">Event/Conference</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="hostName">Host/Person to Meet *</label>
-                    <input type="text" id="hostName" name="hostName" required>
+                    <label for="hostName">Host/Person to Meet at Jinja College *</label>
+                    <input type="text" id="hostName" name="hostName" placeholder="Department/Person name" required>
                 </div>
             </div>
 
             <div class="form-group">
+                <label for="department">Department/Office Visiting</label>
+                <input type="text" id="department" name="department" placeholder="e.g., Administration, Finance, Academic Affairs">
+            </div>
+
+            <div class="form-group">
                 <label for="notes">Additional Notes</label>
-                <textarea id="notes" name="notes" placeholder="Any special requirements or information..."></textarea>
+                <textarea id="notes" name="notes" placeholder="Any special requirements or information for Jinja College staff..."></textarea>
             </div>
 
             <div class="button-group">
-                <button type="submit" class="btn-submit">Check In</button>
+                <button type="submit" class="btn-submit">Check In to Jinja College</button>
                 <button type="reset" class="btn-reset">Clear</button>
             </div>
         </form>
@@ -310,6 +337,7 @@
             const company = document.getElementById('company').value.trim();
             const visitReason = document.getElementById('visitReason').value;
             const hostName = document.getElementById('hostName').value.trim();
+            const department = document.getElementById('department').value.trim();
             const notes = document.getElementById('notes').value.trim();
 
             // Validation
@@ -334,6 +362,7 @@
                 company,
                 visitReason,
                 hostName,
+                department,
                 notes,
                 institution: 'Jinja College',
                 checkInTime: new Date().toLocaleString()
@@ -379,8 +408,10 @@
                         ${visitor.phone ? `<p>Phone: ${visitor.phone}</p>` : ''}
                         ${visitor.company ? `<p>Organization: ${visitor.company}</p>` : ''}
                         <p>Meeting with: ${visitor.hostName}</p>
+                        ${visitor.department ? `<p>Department: ${visitor.department}</p>` : ''}
                         ${visitor.notes ? `<p>Notes: ${visitor.notes}</p>` : ''}
                         <div class="visitor-time">Checked in: ${visitor.checkInTime}</div>
+                        <div class="visitor-time" style="color: #667eea; margin-top: 5px;">📍 Jinja College</div>
                     </div>
                 `;
                 listContent.innerHTML += visitorHTML;
